@@ -1,0 +1,179 @@
+
+--- PROJECT 3: Dynamic pipeline design ---
+
+SQL Queries in on-premises SQL server
+{
+	Create Database 
+	{
+		CREATE DATABASE Project3;
+		GO
+		USE Project3;
+		GO
+	}
+	Create login ID
+	{
+		CREATE LOGIN aughosh WITH PASSWORD = 'Password123456789';
+		GO
+		USE Project3;
+		GO
+		CREATE USER aughosh FOR LOGIN aughosh;
+		ALTER ROLE db_owner ADD MEMBER aughosh;
+	}
+	Create MetadataControl table
+	{
+		CREATE TABLE dbo.MetadataControl (
+		TableName NVARCHAR(100),
+		SchemaName NVARCHAR(50),
+		FileName NVARCHAR(100),
+		FolderPath NVARCHAR(200));
+	}
+	Insert data into MetadataControl table
+	{
+		INSERT INTO dbo.MetadataControl VALUES
+		('Students', 'dbo', 'students.csv', 'project3/students/'),
+		('Courses', 'dbo', 'courses.csv', 'project3/courses/'),
+		('Enrollments', 'dbo', 'enrollments.csv', 'project3/enrollments/'),
+		('Payments', 'dbo', 'payments.csv', 'project3/payments/'),
+		('Tickets', 'dbo', 'tickets.csv', 'project3/tickets/');
+	}
+	Create Students table
+	{
+		CREATE TABLE dbo.Students (
+		StudentID INT PRIMARY KEY,
+		FullName NVARCHAR(100),
+		Email NVARCHAR(100));
+	}
+	Insert data into Students table
+	{
+		INSERT INTO dbo.Students VALUES
+		(1, 'Alice Johnson', 'alice@example.com'),
+		(2, 'Bob Smith', 'bob@example.com'),
+		(3, 'Charlie Davis', 'charlie@example.com');
+	}
+	Create Courses table
+	{
+		CREATE TABLE dbo.Courses (
+		CourseID INT PRIMARY KEY,
+		CourseName NVARCHAR(100),
+		Instructor NVARCHAR(100));
+	}
+	Insert data into Courses table
+	{
+		INSERT INTO dbo.Courses VALUES
+		(101, 'Data Engineering 101', 'Dr. Stone'),
+		(102, 'Cloud Computing Basics', 'Prof. Lin'),
+		(103, 'Azure Fundamentals', 'Dr. Rao');
+	}
+	Create Enrollments table
+	{
+		CREATE TABLE dbo.Enrollments (
+		EnrollmentID INT PRIMARY KEY,
+		StudentID INT,
+		CourseID INT,
+		EnrollmentDate DATE);
+	}
+	Insert data into Enrollments table
+	{
+		INSERT INTO dbo.Enrollments VALUES
+		(1001, 1, 101, '2025-05-01'),
+		(1002, 2, 102, '2025-05-02'),
+		(1003, 3, 103, '2025-05-03');
+	}
+	Create Payments table
+	{
+		CREATE TABLE dbo.Payments (
+		PaymentID INT PRIMARY KEY,
+		StudentID INT,
+		Amount DECIMAL(10, 2),
+		PaymentDate DATE);
+	}
+	Insert data into Payments table
+	{
+		INSERT INTO dbo.Payments VALUES
+		(501, 1, 150.00, '2025-05-10'),
+		(502, 2, 200.00, '2025-05-12'),
+		(503, 3, 175.00, '2025-05-13');
+	}
+	Create Tickets table
+	{
+		CREATE TABLE dbo.Tickets (
+		TicketID INT PRIMARY KEY,
+		StudentID INT,
+		Issue NVARCHAR(255),
+		Status NVARCHAR(50));
+	}
+	Insert data into Payments table
+	{
+		INSERT INTO dbo.Tickets VALUES
+		(301, 1, 'Login issue with portal', 'Resolved'),
+		(302, 2, 'Unable to access course material', 'Open'),
+		(303, 3, 'Billing query', 'In Progress');
+	}
+}
+For Each loop activity
+{
+	Item Expression: @activity('GetMetadataRows').output.value
+}
+Copy Data activity
+{
+	Source
+	{
+		Query
+		{
+			SELECT * FROM @{item().SchemaName}.@{item().TableName}
+		}
+		Parameters
+		{
+			SchemaName - String
+			TableName - String
+		}
+		Table Connection
+		{
+			[@dataset().SchemaName].[@dataset().TableName]
+		}
+	}
+	Sink
+	{
+		Dataset properties
+		{
+			FolderPath	: @item().FolderPath
+			FileName	: @item().FileName
+		}
+		Parameters
+		{
+			FolderPath - String
+			FileName - String
+		}
+	}
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
